@@ -2,43 +2,9 @@ import sys
 import random
 import math
 
-def scheduleEvent(type, time)
-def processArrival(event)
-def processDeparture(event)
-def generateProcesses()
-
-
-# get input arguments
-for i in range(len(sys.argv)):
-    if sys.argv[i] == '-s' and i < (len(sys.argv) - 1):
-        scheduler = sys.argv[i + 1]
-    elif sys.argv[i] == '-a' and i < (len(sys.argv) - 1):
-        arrRate = sys.argv[i + 1]
-    elif sys.argv[i] == '-t' and i < (len(sys.argv) - 1):
-        servTime = sys.argv[i + 1]
-    elif sys.argv[i] == '-q' and i < (len(sys.argv) - 1):
-        quantum = sys.argv[i + 1]
-
-# Initialization
-clock = 0
-processes = generateProcesses()
-print(processes)
-procsDone = 0 # end condition (stop when 10,000 processes done)
-readyQueue = []
-cpuIdle = True
-#eventQueue = eventQueue()
-
-#
-while procsDone <= 10001:
-    event = getEvent()
-    clock = event.time
-    if event.type == "ARR":
-        processArrival(event)
-    else:
-        processDeparture(event)
 
 def generateProcesses():
-    processes = []
+    procs = []
     servRate = 1 / servTime
     time = 0
     for i in range(10020):
@@ -48,15 +14,15 @@ def generateProcesses():
         randNum2 = random.random()
         while randNum2 == 0:
             randNum2 = random.random()
-        randArrTime = math.log(randNum)/arrRate
+        randArrTime = -math.log(randNum)/arrRate
         time += randArrTime
         randServTime = math.log(randNum2)/servRate
         # TODO: create process and add it to list
-        processes.append(randArrTime)
-    return processes
+        procs.append(time)
+    return procs
 
 
-def scheduleEvent(type, time):
+#def scheduleEvent(type, time):
     # creates new event and places it in the event queue
     # TODO
 
@@ -65,7 +31,7 @@ def processArrival(event):
     if cpuIdle:
         cpuIdle = False
         scheduleEvent("DEP", event.time + serviceTime)
-    else:
+    #else:
         # TODO: put event in readyQueue
     # TODO: scheduleEvent("ARR",...) : schedule next arrival?????
 
@@ -91,3 +57,31 @@ class eventNode:
         self.action = action
         self.process = process
         self.next = None
+
+# get input arguments
+for i in range(len(sys.argv)):
+    if sys.argv[i] == '-s' and i < (len(sys.argv) - 1):
+        scheduler = int(sys.argv[i + 1])
+    elif sys.argv[i] == '-a' and i < (len(sys.argv) - 1):
+        arrRate = float(sys.argv[i + 1])
+    elif sys.argv[i] == '-t' and i < (len(sys.argv) - 1):
+        servTime = float(sys.argv[i + 1])
+    elif sys.argv[i] == '-q' and i < (len(sys.argv) - 1):
+        quantum = float(sys.argv[i + 1])
+
+# Initialization
+clock = 0
+processes = generateProcesses()
+procsDone = 0 # end condition (stop when 10,000 processes done)
+readyQueue = []
+cpuIdle = True
+#eventQueue = eventQueue()
+
+#
+'''while procsDone <= 10001:
+    event = getEvent()
+    clock = event.time
+    if event.type == "ARR":
+        processArrival(event)
+    else:
+        processDeparture(event)'''
