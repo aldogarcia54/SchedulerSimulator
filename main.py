@@ -40,11 +40,56 @@ def FCFS():
     print("CPU Utilization: ",(clock-nonUsage)/clock,"%")
     print("Avg number of processes in ready queue: ",readyQueueUsg/clock,"processes")
 
+def SJF():
+    global procsDone
+    global clock
+    global processes
+    global readyQueue
+    turnaround = 0
+    nonUsage = 0
+    readyQueueUsg = 0
+    while procsDone <= 10001:
+        # find process in ready queue with shortest remaining time
+        least = None
+        process = None
+        if len(readyQueue) == 0: # get next process in future
+            process = processes[procsDone]
+        else:
+            id = 0
+            least = readyQueue[0].remainingTime
+            process = readyQueue[0]
+            for i in range(len(readyQueue)):
+                if readyQueue[i].remainingTime < least:
+                    least = readyQueue[i].remainingTime
+                    process = readyQueue[i]
+                    id = i
+            readyQueue.pop(i)
+        # put process in cpu
+        if process.arrivalTime < clock:
+            waitTime = clock - process.arrivalTime
+            readyQueueUsg += waitTime
+        elif process.arrivalTime > clock:
+            nonUsage += process.arrivalTime - clock
+            clock = process.arrivalTime
+        process.completionTime = process.serviceTime + clock
+        clock = process.completionTime
+        # put processes that arrived in the meantime in ready queue
+        i = procsDone + len(readyQueue) + 1
+        while processes[i].arrivalTime < clock:
+            readyQueue.append(process)
+            i += 1
+        turnaround += process.completionTime - process.arrivalTime
+        procsDone += 1
+    print("Turnaround: ",turnaround/procsDone,"seconds")
+    print("Throughput: ",procsDone/clock,"procs/sec")
+    print("CPU Utilization: ",(clock-nonUsage)/clock,"%")
+    print("Avg number of processes in ready queue: ",readyQueueUsg/clock,"processes")
+
 def generateProcesses():
     procs = []
     servRate = 1 / servTime
     time = 0
-    for i in range(10020):
+    for i in range(20000):
         randNum = random.random()
         while randNum == 0:
             randNum = random.random()
@@ -131,6 +176,8 @@ if scheduler == 1:
     FCFS()
     #for proc in processes:
         #print(proc.completionTime)
+elif scheduler == 2:
+    SJF()
 
 '''while procsDone <= 10001:
     event = getEvent()
