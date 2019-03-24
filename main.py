@@ -18,6 +18,7 @@ def FCFS():
             readyQueueUsg += waitTime
         elif event.arrivalTime > clock:
             nonUsage += event.arrivalTime - clock
+            clock = event.arrivalTime
         event.completionTime = event.serviceTime + clock
         clock = event.completionTime
         # put processes in ready queue
@@ -34,10 +35,11 @@ def FCFS():
         processes[procsDone] = event
         turnaround += event.completionTime - event.arrivalTime
         procsDone += 1
-    print(turnaround/procsDone)
-    print(procsDone/clock)
-    print(clock-nonUsage)
-    print(readyQueueUsg)
+    print("Turnaround: ",turnaround/procsDone,"seconds")
+    print("Throughput: ",procsDone/clock,"procs/sec")
+    print("CPU Utilization: ",(clock-nonUsage)/clock,"%")
+    print("Avg number of processes in ready queue: ",readyQueueUsg/clock,"processes")
+
 def generateProcesses():
     procs = []
     servRate = 1 / servTime
