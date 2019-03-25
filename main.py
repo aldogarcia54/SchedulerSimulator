@@ -3,6 +3,7 @@ import random
 import math
 
 def FCFS():
+    # TODO: maybe take a look into implementing readyqueue to find ready queue usage
     global procsDone
     global clock
     global processes
@@ -86,6 +87,103 @@ def SJF():
     print("Throughput: ", procsDone/clock ,"procs/sec")
     print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
     print("Avg number of processes in ready queue: ", readyQueueUsg/procsDone, "processes")
+
+def HRRN():
+    global procsDone
+    global clock
+    global processes
+    global readyQueue
+    turnaround = 0
+    nonUsage = 0
+    readyQueueUsg = 0
+    i = 0
+    while procsDone <= 10001:
+        # find process in ready queue with highest response ratio
+        least = None
+        process = None
+        if len(readyQueue) == 0: # get next process in future
+            process = processes[procsDone]
+        else:
+            id = 0
+            highest = ((clock - readyQueue[0].arrivalTime) + readyQueue[0].serviceTime)/readyQueue[0].serviceTime
+            process = readyQueue[0]
+            for i in range(len(readyQueue)):
+                RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime)/readyQueue[i].serviceTime
+                if RR > highest:
+                    highest = readyQueue[i].remainingTime
+                    process = readyQueue[i]
+                    id = i
+            readyQueue.pop(id)
+        # put process in cpu
+        if process.arrivalTime < clock:
+            waitTime = clock - process.arrivalTime
+            readyQueueUsg += waitTime
+        elif process.arrivalTime >= clock:
+            nonUsage += process.arrivalTime - clock
+            clock = process.arrivalTime
+
+        process.completionTime = process.serviceTime + clock
+        clock = process.completionTime
+        # put processes that arrived in the meantime in ready queue
+        while processes[i].arrivalTime <= clock:
+            readyQueue.append(process)
+            i += 1
+        readyQueueUsg += len(readyQueue)
+        turnaround += process.completionTime - process.arrivalTime
+        procsDone += 1
+    print("Turnaround: ", turnaround/procsDone, "seconds")
+    print("Throughput: ", procsDone/clock ,"procs/sec")
+    print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
+    print("Avg number of processes in ready queue: ", readyQueueUsg/procsDone, "processes")
+
+def RR():
+    global procsDone
+    global clock
+    global processes
+    global readyQueue
+    global quantum
+    turnaround = 0
+    nonUsage = 0
+    readyQueueUsg = 0
+    i = 0
+    while procsDone <= 10001:
+        # find process in ready queue with highest response ratio
+        least = None
+        process = None
+        if len(readyQueue) == 0:  # get next process in future
+            process = processes[procsDone]
+        else:
+            id = 0
+            highest = ((clock - readyQueue[0].arrivalTime) + readyQueue[0].serviceTime) / readyQueue[0].serviceTime
+            process = readyQueue[0]
+            for i in range(len(readyQueue)):
+                RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime) / readyQueue[i].serviceTime
+                if RR > highest:
+                    highest = readyQueue[i].remainingTime
+                    process = readyQueue[i]
+                    id = i
+            readyQueue.pop(id)
+        # put process in cpu
+        if process.arrivalTime < clock:
+            waitTime = clock - process.arrivalTime
+            readyQueueUsg += waitTime
+        elif process.arrivalTime >= clock:
+            nonUsage += process.arrivalTime - clock
+            clock = process.arrivalTime
+
+        process.completionTime = process.serviceTime + clock
+        clock = process.completionTime
+        # put processes that arrived in the meantime in ready queue
+        while processes[i].arrivalTime <= clock:
+            readyQueue.append(process)
+            i += 1
+        readyQueueUsg += len(readyQueue)
+        turnaround += process.completionTime - process.arrivalTime
+        procsDone += 1
+    print("Turnaround: ", turnaround / procsDone, "seconds")
+    print("Throughput: ", procsDone / clock, "procs/sec")
+    print("CPU Utilization: ", (clock - nonUsage) / clock, "%")
+    print("Avg number of processes in ready queue: ", readyQueueUsg / procsDone, "processes")
 
 def generateProcesses():
     procs = []
@@ -180,6 +278,10 @@ if scheduler == 1:
         #print(proc.completionTime)
 elif scheduler == 2:
     SJF()
+elif scheduler == 3:
+    HRRN()
+elif scheduler == 4:
+    RR()
 
 '''while procsDone <= 10001:
     event = getEvent()
