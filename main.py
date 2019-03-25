@@ -48,8 +48,9 @@ def SJF():
     turnaround = 0
     nonUsage = 0
     readyQueueUsg = 0
+    i = 0
     while procsDone <= 10001:
-        # find process in ready queue with shortest remaining time
+        # find process in ready queue with shortest job time
         least = None
         process = None
         if len(readyQueue) == 0: # get next process in future
@@ -63,27 +64,28 @@ def SJF():
                     least = readyQueue[i].remainingTime
                     process = readyQueue[i]
                     id = i
-            readyQueue.pop(i)
+            readyQueue.pop(id)
         # put process in cpu
         if process.arrivalTime < clock:
             waitTime = clock - process.arrivalTime
             readyQueueUsg += waitTime
-        elif process.arrivalTime > clock:
+        elif process.arrivalTime >= clock:
             nonUsage += process.arrivalTime - clock
             clock = process.arrivalTime
+
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
         # put processes that arrived in the meantime in ready queue
-        i = procsDone + len(readyQueue) + 1
-        while processes[i].arrivalTime < clock:
+        while processes[i].arrivalTime <= clock:
             readyQueue.append(process)
             i += 1
+        readyQueueUsg += len(readyQueue)
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
-    print("Turnaround: ",turnaround/procsDone,"seconds")
-    print("Throughput: ",procsDone/clock,"procs/sec")
-    print("CPU Utilization: ",(clock-nonUsage)/clock,"%")
-    print("Avg number of processes in ready queue: ",readyQueueUsg/clock,"processes")
+    print("Turnaround: ", turnaround/procsDone, "seconds")
+    print("Throughput: ", procsDone/clock ,"procs/sec")
+    print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
+    print("Avg number of processes in ready queue: ", readyQueueUsg/procsDone, "processes")
 
 def generateProcesses():
     procs = []
