@@ -49,7 +49,6 @@ def SJF():
     turnaround = 0
     nonUsage = 0
     readyQueueUsg = 0
-    i = 0
     while procsDone <= 10001:
         # find process in ready queue with shortest job time
         least = None
@@ -77,10 +76,10 @@ def SJF():
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
         # put processes that arrived in the meantime in ready queue
+        i = procsDone + len(readyQueue)
         while processes[i].arrivalTime <= clock:
-            readyQueue.append(process)
+            readyQueue.append(processes[i])
             i += 1
-        readyQueueUsg += len(readyQueue)
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
     print("Turnaround: ", turnaround/procsDone, "seconds")
