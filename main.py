@@ -3,7 +3,6 @@ import random
 import math
 
 def FCFS():
-    # TODO: maybe take a look into implementing readyqueue to find ready queue usage
     global procsDone
     global clock
     global processes
@@ -82,11 +81,8 @@ def HRRN():
     turnaround = 0
     nonUsage = 0
     readyQueueUsg = 0
-    i = 0
     while procsDone <= 10001:
         # find process in ready queue with highest response ratio
-        least = None
-        process = None
         if len(readyQueue) == 0: # get next process in future
             process = processes[procsDone]
         else:
@@ -96,7 +92,7 @@ def HRRN():
             for i in range(len(readyQueue)):
                 RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime)/readyQueue[i].serviceTime
                 if RR > highest:
-                    highest = readyQueue[i].remainingTime
+                    highest = RR
                     process = readyQueue[i]
                     id = i
             readyQueue.pop(id)
@@ -111,16 +107,16 @@ def HRRN():
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
         # put processes that arrived in the meantime in ready queue
+        i = procsDone + len(readyQueue)
         while processes[i].arrivalTime <= clock:
-            readyQueue.append(process)
+            readyQueue.append(processes[i])
             i += 1
-        readyQueueUsg += len(readyQueue)
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
     print("Turnaround: ", turnaround/procsDone, "seconds")
     print("Throughput: ", procsDone/clock ,"procs/sec")
     print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
-    print("Avg number of processes in ready queue: ", readyQueueUsg/procsDone, "processes")
+    print("Avg number of processes in ready queue: ", readyQueueUsg/clock, "processes")
 
 def RR():
     global procsDone
@@ -175,7 +171,7 @@ def generateProcesses():
     procs = []
     servRate = 1 / servTime
     time = 0
-    for i in range(20000):
+    for i in range(15000):
         randNum = random.random()
         while randNum == 0:
             randNum = random.random()
