@@ -22,10 +22,10 @@ def FCFS():
         clock = event.completionTime
         turnaround += event.completionTime - event.arrivalTime
         procsDone += 1
-    print("Turnaround: ",turnaround/procsDone,"seconds")
-    print("Throughput: ",procsDone/clock,"procs/sec")
-    print("CPU Utilization: ",(clock-nonUsage)/clock,"%")
-    print("Avg number of processes in ready queue: ",readyQueueUsg/clock,"processes")
+    print(turnaround/procsDone)
+    print(procsDone/clock)
+    print((clock-nonUsage)/clock)
+    print(readyQueueUsg/clock)
 
 def SJF():
     global procsDone
@@ -68,10 +68,10 @@ def SJF():
             i += 1
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
-    print("Turnaround: ", turnaround/procsDone, "seconds")
-    print("Throughput: ", procsDone/clock ,"procs/sec")
-    print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
-    print("Avg number of processes in ready queue: ", readyQueueUsg/clock, "processes")
+    print(turnaround / procsDone)
+    print(procsDone / clock)
+    print((clock - nonUsage) / clock)
+    print(readyQueueUsg / clock)
 
 def HRRN():
     global procsDone
@@ -113,10 +113,10 @@ def HRRN():
             i += 1
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
-    print("Turnaround: ", turnaround/procsDone, "seconds")
-    print("Throughput: ", procsDone/clock ,"procs/sec")
-    print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
-    print("Avg number of processes in ready queue: ", readyQueueUsg/clock, "processes")
+    print(turnaround / procsDone)
+    print(procsDone / clock)
+    print((clock - nonUsage) / clock)
+    print(readyQueueUsg / clock)
 
 def RR():
     global procsDone
@@ -127,21 +127,18 @@ def RR():
     turnaround = 0
     nonUsage = 0
     readyQueueUsg = 0
-    i = 0
     while procsDone <= 10001:
         # find process in ready queue with highest response ratio
-        least = None
-        process = None
-        if len(readyQueue) == 0:  # get next process in future
+        if len(readyQueue) == 0: # get next process in future
             process = processes[procsDone]
         else:
             id = 0
-            highest = ((clock - readyQueue[0].arrivalTime) + readyQueue[0].serviceTime) / readyQueue[0].serviceTime
+            highest = ((clock - readyQueue[0].arrivalTime) + readyQueue[0].serviceTime)/readyQueue[0].serviceTime
             process = readyQueue[0]
             for i in range(len(readyQueue)):
-                RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime) / readyQueue[i].serviceTime
+                RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime)/readyQueue[i].serviceTime
                 if RR > highest:
-                    highest = readyQueue[i].remainingTime
+                    highest = RR
                     process = readyQueue[i]
                     id = i
             readyQueue.pop(id)
@@ -156,10 +153,10 @@ def RR():
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
         # put processes that arrived in the meantime in ready queue
+        i = procsDone + len(readyQueue)
         while processes[i].arrivalTime <= clock:
-            readyQueue.append(process)
+            readyQueue.append(processes[i])
             i += 1
-        readyQueueUsg += len(readyQueue)
         turnaround += process.completionTime - process.arrivalTime
         procsDone += 1
     print("Turnaround: ", turnaround / procsDone, "seconds")
