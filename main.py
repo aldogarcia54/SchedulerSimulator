@@ -11,29 +11,16 @@ def FCFS():
     turnaround = 0
     nonUsage = 0
     readyQueueUsg = 0
-    readyQueue.append(processes[procsDone])
     while procsDone <= 10001:
         event = processes[procsDone]
         if event.arrivalTime < clock:
             waitTime = clock - event.arrivalTime
             readyQueueUsg += waitTime
-        elif event.arrivalTime > clock:
+        elif event.arrivalTime >= clock:
             nonUsage += event.arrivalTime - clock
             clock = event.arrivalTime
         event.completionTime = event.serviceTime + clock
         clock = event.completionTime
-        # put processes in ready queue
-        t = True
-        i = procsDone + 1
-        if len(readyQueue) > 0:
-            readyQueue = readyQueue[1:]
-        while t:
-            if processes[i].arrivalTime < clock:
-                readyQueue.append(processes[i])
-                i += 1
-            else:
-                t = False
-        processes[procsDone] = event
         turnaround += event.completionTime - event.arrivalTime
         procsDone += 1
     print("Turnaround: ",turnaround/procsDone,"seconds")
