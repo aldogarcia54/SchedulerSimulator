@@ -85,7 +85,7 @@ def SJF():
     print("Turnaround: ", turnaround/procsDone, "seconds")
     print("Throughput: ", procsDone/clock ,"procs/sec")
     print("CPU Utilization: ", (clock-nonUsage)/clock, "%")
-    print("Avg number of processes in ready queue: ", readyQueueUsg/procsDone, "processes")
+    print("Avg number of processes in ready queue: ", readyQueueUsg/clock, "processes")
 
 def HRRN():
     global procsDone
