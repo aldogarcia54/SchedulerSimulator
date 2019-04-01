@@ -8,10 +8,15 @@ python_version = '3'
 path_to_run = './main'
 py_name = '.py'
 
-for j in range(1,5):
+for j in range(1,6):
     for i in range(1,31):
         # args = [f"python{python_version}", f"{path_to_run}{py_name}"]  # Avaible in python3
-        args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name), "-s", str(j), "-a",str(i), "-t", ".06"]
+        if j == 4:
+            args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name), "-s", str(j), "-a",str(i), "-t", ".06","-q",".01"]
+        elif j == 5:
+            args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name), "-s", str(4), "-a",str(i), "-t", ".06", "-q",".2"]
+        else:
+            args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name), "-s", str(j), "-a",str(i), "-t", ".06"]
 
         res = subprocess.Popen(args, stdout=subprocess.PIPE)
         output, error_ = res.communicate()

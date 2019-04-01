@@ -24,10 +24,10 @@ def FCFS():
         procsDone += 1
     print(turnaround/procsDone)
     print(procsDone/clock)
-    print((clock-nonUsage)/clock)
+    print(((clock-nonUsage)/clock)*100)
     print(readyQueueUsg/clock)
 
-def SJF():
+def SRTF():
     global procsDone
     global clock
     global processes
@@ -61,16 +61,16 @@ def SJF():
 
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
+        procsDone += 1
         # put processes that arrived in the meantime in ready queue
         i = procsDone + len(readyQueue)
         while processes[i].arrivalTime <= clock:
             readyQueue.append(processes[i])
             i += 1
         turnaround += process.completionTime - process.arrivalTime
-        procsDone += 1
     print(turnaround / procsDone)
     print(procsDone / clock)
-    print((clock - nonUsage) / clock)
+    print(((clock - nonUsage) / clock)*100)
     print(readyQueueUsg / clock)
 
 def HRRN():
@@ -106,16 +106,16 @@ def HRRN():
 
         process.completionTime = process.serviceTime + clock
         clock = process.completionTime
+        procsDone += 1
         # put processes that arrived in the meantime in ready queue
         i = procsDone + len(readyQueue)
         while processes[i].arrivalTime <= clock:
             readyQueue.append(processes[i])
             i += 1
         turnaround += process.completionTime - process.arrivalTime
-        procsDone += 1
     print(turnaround / procsDone)
     print(procsDone / clock)
-    print((clock - nonUsage) / clock)
+    print(((clock - nonUsage) / clock)*100)
     print(readyQueueUsg / clock)
 
 def RR():
@@ -128,47 +128,47 @@ def RR():
     nonUsage = 0
     readyQueueUsg = 0
     while procsDone <= 10001:
-        # find process in ready queue with highest response ratio
+        # find process in ready queue to go next
         if len(readyQueue) == 0: # get next process in future
             process = processes[procsDone]
         else:
-            id = 0
-            highest = ((clock - readyQueue[0].arrivalTime) + readyQueue[0].serviceTime)/readyQueue[0].serviceTime
             process = readyQueue[0]
-            for i in range(len(readyQueue)):
-                RR = ((clock - readyQueue[i].arrivalTime) + readyQueue[i].serviceTime)/readyQueue[i].serviceTime
-                if RR > highest:
-                    highest = RR
-                    process = readyQueue[i]
-                    id = i
-            readyQueue.pop(id)
+            readyQueue.pop(0)
         # put process in cpu
-        if process.arrivalTime < clock:
-            waitTime = clock - process.arrivalTime
-            readyQueueUsg += waitTime
-        elif process.arrivalTime >= clock:
+        if process.arrivalTime >= clock:
             nonUsage += process.arrivalTime - clock
             clock = process.arrivalTime
-
-        process.completionTime = process.serviceTime + clock
-        clock = process.completionTime
+        # if process has enough time to finish, finish with process
+        if process.remainingTime <= quantum:
+            if process.arrivalTime < clock:
+                waitTime = clock - process.arrivalTime
+                readyQueueUsg += waitTime
+            process.completionTime = process.remainingTime + clock
+            clock = process.completionTime
+            procsDone += 1
+            turnaround += process.completionTime - process.arrivalTime
+        # else put the process back in the ready queue
+        else:
+            process.remainingTime = process.remainingTime - quantum
+            clock = quantum + clock
+            readyQueue.append(process)
         # put processes that arrived in the meantime in ready queue
         i = procsDone + len(readyQueue)
+        tempQueue = []
         while processes[i].arrivalTime <= clock:
-            readyQueue.append(processes[i])
+            tempQueue.append(processes[i])
             i += 1
-        turnaround += process.completionTime - process.arrivalTime
-        procsDone += 1
-    print("Turnaround: ", turnaround / procsDone, "seconds")
-    print("Throughput: ", procsDone / clock, "procs/sec")
-    print("CPU Utilization: ", (clock - nonUsage) / clock, "%")
-    print("Avg number of processes in ready queue: ", readyQueueUsg / procsDone, "processes")
+        readyQueue = tempQueue + readyQueue
+    print(turnaround / procsDone)
+    print(procsDone / clock)
+    print(((clock - nonUsage) / clock)*100)
+    print(readyQueueUsg / clock)
 
 def generateProcesses():
     procs = []
     servRate = 1 / servTime
     time = 0
-    for i in range(15000):
+    for i in range(30000):
         randNum = random.random()
         while randNum == 0:
             randNum = random.random()
@@ -178,32 +178,9 @@ def generateProcesses():
         randArrTime = -math.log(randNum)/arrRate
         time += randArrTime
         randServTime = -math.log(randNum2)/servRate
-        proc = Process(i, randServTime, time, randServTime, 0) # TODO: fix completion time variable
+        proc = Process(i, randServTime, time, randServTime, 0)
         procs.append(proc)
     return procs
-
-
-#def scheduleEvent(type, time):
-    # creates new event and places it in the event queue
-    # TODO
-
-
-def processArrival(event):
-    global cpuIdle
-    if cpuIdle:
-        cpuIdle = False
-        scheduleEvent("DEP", event.time + serviceTime)
-    #else:
-        # TODO: put event in readyQueue
-    # TODO: scheduleEvent("ARR",...) : schedule next arrival?????
-
-def processDeparture(event):
-    global cpuIdle
-    if readyQueue == []:
-        cpuIdle = True
-    else:
-        # TODO: remove process from ready queue
-        scheduleEvent("DEP", event.time + serviceTime)
 
 class Process:
     def __init__(self, id, serviceTime, arrivalTime, remainingTime, completionTime):
@@ -212,23 +189,6 @@ class Process:
         self.arrivalTime = arrivalTime
         self.remainingTime = remainingTime
         self.completionTime = completionTime
-
-class eventNode:
-    def __init__(self, time, action, process):
-        self.time = time
-        self.action = action
-        self.process = process
-        self.next = None
-
-    def addNext(self, node):
-        if self.next == None:
-            self.next = node
-        else:
-            self.next.addNext(node)
-
-class eventQueue:
-    def __init__(self):
-        self.head = None
 
 # get input arguments
 for i in range(len(sys.argv)):
@@ -244,28 +204,15 @@ for i in range(len(sys.argv)):
 # Initialization
 clock = 0
 processes = generateProcesses()
-'''for process in processes:
-    print(process.completionTime)'''
 procsDone = 0 # end condition (stop when 10,000 processes done)
 readyQueue = []
 cpuIdle = True
-eventQueue = eventQueue()
 
 if scheduler == 1:
     FCFS()
-    #for proc in processes:
-        #print(proc.completionTime)
 elif scheduler == 2:
     SJF()
 elif scheduler == 3:
     HRRN()
 elif scheduler == 4:
     RR()
-
-'''while procsDone <= 10001:
-    event = getEvent()
-    clock = event.time
-    if event.type == "ARR":
-        processArrival(event)
-    else:
-        processDeparture(event)'''
